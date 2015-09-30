@@ -66,6 +66,9 @@ static const char RCSid[] = "$Id: tty.c,v 35004.38 2007/01/13 23:12:39 kkeys Exp
 # define ingetattr_error "TIOCGETP ioctl"
 #endif
 
+#include <unistd.h>
+#include <fcntl.h>
+
 static tty_struct old_tty;
 static int is_custom_tty = 0;        /* is tty in customized mode? */
 
@@ -226,7 +229,7 @@ void cbreak_noecho_mode(void)
     /* Leave ONLCR on, so write(1) and other things that blast onto the screen
      * without asking look at least somewhat sane.
      */
-    tty.c_cc[VMIN] = 0;
+    tty.c_cc[VMIN] = 1;
     tty.c_cc[VTIME] = 0;
     tty.c_cc[VSTOP] = 0;	/* disable useless key */
     tty.c_cc[VSTART] = 0;	/* disable useless key */
@@ -260,6 +263,11 @@ void cbreak_noecho_mode(void)
      * we can't do anything about making external screen writers look sane.
      */
 #endif
+
+    int flags;
+    flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    flags |= O_NONBLOCK;
+    fcntl(STDIN_FILENO, F_SETFL, flags);
 
     if (insetattr(&tty) < 0) die(insetattr_error, errno);
     is_custom_tty = 1;
