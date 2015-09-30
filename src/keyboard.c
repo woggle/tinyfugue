@@ -132,7 +132,7 @@ int handle_keyboard_input(int read_flag)
             /* nothing was read, and nothing is buffered */
 	    /* Don't close stdin; we might be wrong (solaris bug), and we
 	     * don't want the fd to be reused anyway. */
-	    // eof++;
+	    eof++;
         }
     }
 
